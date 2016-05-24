@@ -5,23 +5,16 @@
 
 #include "ringbuf.h"
 
-////modを使うのと、if文で計算するのとどちらが速いのだろう？
-//#if 1
-//#define M_POS(pos,size,n)  (((pos) + (n)) % (size))
-//#else
-//#define M_POS(pos,size,n)  (((pos) + (n) >= (size)) ? (pos) + (n) - (size) : (pos) + (n))
-//#endif
-//#define M_WPOS(pBuf,n)     M_POS((pBuf)->wpos, (pBuf)->size, n)
-//#define M_RPOS(pBuf,n)     M_POS((pBuf)->rpos, (pBuf)->size, n)
-
 #define M_ROUND(pos,size,n)     ((((pos)+(n)) >= (size)) ? (pos)+(n)-(size) : (pos)+(n))
 #define M_WPOS_ROUND(pBuf,n)    M_ROUND((pBuf)->wpos, (pBuf)->size, (n))
 #define M_RPOS_ROUND(pBuf,n)    M_ROUND((pBuf)->rpos, (pBuf)->size, (n))
 
-#define DBG_PRINTF          printf
+//#define DBG_PRINTF          printf
+#define DBG_PRINTF(...)     /*none*/
 #define DBG_STATUS(pBuf)    {   \
-        printf("[%s %d]rpos=%d, wpos=%d, size=%d, EMPTY[%d]\n", __func__, __LINE__, pBuf->rpos, pBuf->wpos, pBuf->size, pBuf->empty);  \
+        DBG_PRINTF("[%s %d]rpos=%d, wpos=%d, size=%d, EMPTY[%d]\n", __func__, __LINE__, pBuf->rpos, pBuf->wpos, pBuf->size, pBuf->empty);  \
     }
+
 
 void RingBufAlloc(RingBuf_t *pBuf, size_t BufSz)
 {
