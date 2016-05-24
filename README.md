@@ -1,2 +1,3 @@
 # ringbuf
-Ring Buffer for clang
+
+C言語用リングバッファソース
