@@ -42,13 +42,13 @@ TEST_F(RingBuf, RingBufAlloc_Free)
     ASSERT_EQ(0, buf.rpos);
     ASSERT_EQ(0, buf.wpos);
     ASSERT_EQ(5UL, buf.size);
-    ASSERT_NE(0, (int)buf.buf);
+    ASSERT_NE((uint8_t *)0, buf.buf);
     ASSERT_TRUE(buf.empty);
 
 
     RingBufFree(&buf);
     
-    ASSERT_EQ(0, (int)buf.buf);
+    ASSERT_EQ((uint8_t *)0, buf.buf);
 }
 
 
@@ -225,6 +225,36 @@ TEST_F(RingBuf2, RingBufWrite6)
     RingBuf2::mBuf.empty = false;
 
     const uint8_t DATA[] = { 5, 6 };
+    size_t sz = sizeof(DATA);
+
+    RingBufWrite(&RingBuf2::mBuf, DATA, &sz);
+
+    ASSERT_EQ(1, RingBuf2::mBuf.rpos);
+    ASSERT_EQ(1, RingBuf2::mBuf.wpos);
+    ASSERT_EQ(6, RingBuf2::mBuf.buf[0]);
+    ASSERT_EQ(0xcc, RingBuf2::mBuf.buf[1]);
+    ASSERT_EQ(5, RingBuf2::mBuf.buf[2]);
+    ASSERT_FALSE(RingBuf2::mBuf.empty);
+    ASSERT_EQ(2UL, sz);
+}
+
+
+/////////////////////////////////////////////////
+
+TEST_F(RingBuf2, RingBufWrite7)
+{
+    //空き上がは1つで、下に1つ
+    //      +---+
+    //    W2|   |
+    //    R1|   |
+    //     0|   |
+    //      +---+
+    RingBuf2::mBuf.rpos = 1;
+    RingBuf2::mBuf.wpos = 2;
+    RingBuf2::mBuf.empty = false;
+
+    //下エリアの空きが足りない
+    const uint8_t DATA[] = { 5, 6, 7 };
     size_t sz = sizeof(DATA);
 
     RingBufWrite(&RingBuf2::mBuf, DATA, &sz);
@@ -586,6 +616,43 @@ TEST_F(RingBuf2, RingBufRead2_0_3)
     ASSERT_EQ(0xdd, data[1]);
     ASSERT_EQ(0xdd, data[2]);
     ASSERT_TRUE(RingBuf2::mBuf.empty);
+}
+
+
+/////////////////////////////////////////////////
+
+//RingBufRead_{rpos}_{wpos}_{sz}
+TEST_F(RingBuf2, RingBufRead2_2_2)
+{
+    //書込みデータ
+    //     !empty
+    //      +---+
+    //   RW2| 3 |
+    //     1| 2 |
+    //     0| 1 |
+    //      +---+
+    RingBuf2::mBuf.rpos = 2;
+    RingBuf2::mBuf.wpos = 2;
+    RingBuf2::mBuf.empty = false;
+    RingBuf2::mBuf.buf[0] = 1;
+    RingBuf2::mBuf.buf[1] = 2;
+    RingBuf2::mBuf.buf[2] = 3;
+
+
+    uint8_t data[3];
+    memset(data, 0xdd, sizeof(data));
+    size_t sz = 2;
+
+    RingBufRead(&RingBuf2::mBuf, data, &sz);
+
+    //下エリア用のバッファが足りないパターン
+    ASSERT_EQ(1, RingBuf2::mBuf.rpos);
+    ASSERT_EQ(2, RingBuf2::mBuf.wpos);
+    ASSERT_EQ(2UL, sz);
+    ASSERT_EQ(3, data[0]);
+    ASSERT_EQ(1, data[1]);
+    ASSERT_EQ(0xdd, data[2]);
+    ASSERT_FALSE(RingBuf2::mBuf.empty);
 }
 
 
