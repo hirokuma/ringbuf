@@ -1,3 +1,26 @@
+/*
+ * The MIT License (MIT)
+ * 
+ * Copyright (c) 2016 hirokuma
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 #include <stdio.h>
 #include <string.h>
 #include <stdint.h>
@@ -179,28 +202,3 @@ void RingBufRead(RingBuf_t *pBuf, uint8_t *pData, size_t *pSize)
     DBG_PRINTF("[%s %d]*pSize=%d\n", __func__, __LINE__, *pSize);
     DBG_STATUS(pBuf);
 }
-
-
-
-
-//    初期状態               wposが先               rposが先
-//      +-------------+        +-------------+        +-------------+ 
-//      |             |        |             |        |/////////////| 
-//      |             |        |             |        |/////////////| 
-//      |             |       W+-------------+       R+-------------+ 
-//      |             |        |/////////////|        |             | 
-//      |             |        |/////////////|        |             | 
-//      |             |       R+-------------+       W+-------------+ 
-//      |             |        |             |        |/////////////| 
-//    RW+-------------+        +-------------+        +-------------+ 
-//
-//     emp       !emp       !emp      !emp      !emp      !emp      !emp      emp
-//      +---+     +---+      +---+     +---+     +---+     +---+     +---+     +---+
-//     5|   |    5|   |     5|   |    5|   |    5| c |    5| c |    5|   |    5|   |
-//     4|   |    4|   |     4|   |    4|   |    4| b |    4| b |    4|   |    4|   |
-//     3|   |   W3|   |    W3|   |  RW3|   |   R3| a |  RW3| a |   W3|   |  RW3|   |
-//     2|   |    2| C |     2| C |    2|   |   W2|   |    2| f |    2| f |    2|   |
-//     1|   |    1| B |    R1| B |    1|   |    1| e |    1| e |   R1| e |    1|   |
-//   RW0|   |   R0| A |     0|   |    0|   |    0| d |    0| d |    0|   |    0|   |
-//      +---+     +---+      +---+     +---+     +---+     +---+     +---+     +---+
-//   wr(ABC)    rd(1)      rd(2)     wr(abcde) wr(f)     rd(4)      rd(2)
